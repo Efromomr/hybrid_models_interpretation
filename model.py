@@ -1,5 +1,11 @@
 #model.py
-class LanguageModel(nn.Module):
+import typing as tp
+
+import torch 
+import torch.nn as nn
+from huggingface_hub import PyTorchModelHubMixin
+
+class LanguageModel(nn.Module, PyTorchModelHubMixin):
     """
     Language model backbone.
 
@@ -18,8 +24,8 @@ class LanguageModel(nn.Module):
         layers: list,
         layer_cfgs: list,
         dim: int = 128,
-        max_length: int = 1280,
-        norm: nn.Module = torch.nn.RMSNorm,
+        max_length: int = 512,
+        norm: nn.Module = nn.RMSNorm,
         position_embeds: tp.Callable = None,
         embed_drop_rate: float = 0.0,
         *args, **kwargs
@@ -40,9 +46,9 @@ class LanguageModel(nn.Module):
 
         self.model = nn.ModuleList([])
         for layer, layer_cfg in zip(layers, layer_cfgs):
-            self.model.append(nn.Sequential(norm(layer_cfg['dim']), layer(**layer_cfg)))
+            self.model.append(nn.Sequential(norm(layer_cfg['dim'] if 'dim' in layer_cfg else layer_cfg['embed_dim']), layer(**layer_cfg)))
 
-        self.unembed = nn.Sequential(norm(layer_cfg['dim']), nn.Linear(dim, 2))
+        self.unembed = nn.Sequential(norm(layer_cfg['dim'] if 'dim' in layer_cfg else layer_cfg['embed_dim']), nn.Linear(dim, 2))
         self.apply(self._init_weights)
 
     def embed(self,

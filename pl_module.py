@@ -1,7 +1,10 @@
 #pl_module.py
 
-import pytorch_lightning as pl
+import typing as tp
 
+import torch 
+import torch.nn as nn
+import pytorch_lightning as pl
 import torchmetrics as met
 from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
